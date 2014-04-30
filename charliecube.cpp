@@ -6,6 +6,7 @@
   4x4x4 charlieplexed LED cube driver
  */
  
+#include <Arduino.h>
 #include <TimerOne.h>
 #include "charliecube.h"
 
@@ -96,85 +97,9 @@ CharlieCubeBase::begin(void)
   Timer1.attachInterrupt(tick);
 }
 
-CharlieCube cube;
-
-void setup()
-{
-  cube.begin();
-}
-
-void set_xplane(uint8_t x, uint8_t val)
-{
-  uint8_t y;
-  uint8_t z;
-  for (y = 0; y < 4; y++)
-    for (z = 0; z < 4; z++)
-      cube.set_pixel(x, y, z, val);
-}
-
-void set_yplane(uint8_t y, uint8_t val)
-{
-  uint8_t x;
-  uint8_t z;
-  for (x = 0; x < 4; x++)
-    for (z = 0; z < 4; z++)
-      cube.set_pixel(x, y, z, val);
-}
-
-void set_zplane(uint8_t z, uint8_t val)
-{
-  uint8_t x;
-  uint8_t y;
-  for (x = 0; x < 4; x++)
-    for (y = 0; y < 4; y++)
-      cube.set_pixel(x, y, z, val);
-}
 
 CharlieCube::CharlieCube(void) : CharlieCubeBase()
 {
   write_base = framebuffer;
   display_base = framebuffer;
 }
-
-#define D 200
-// the loop routine runs over and over again forever:
-void loop()
-{
-  int8_t i;
-  //set_zplane(2, 0xff);
-  //while(1);
-  for (i = 0; i < 4; i++) {
-    set_xplane(i, 0xff);
-    delay(D);
-    set_xplane(i, 0);
-  }
-  for (i = 2; i >= 0;  i--) {
-    set_xplane(i, 0xff);
-    delay(D);
-    set_xplane(i, 0);
-  }
-  delay(D);
-  for (i = 0; i < 4; i++) {
-    set_yplane(i, 0xff);
-    delay(D);
-    set_yplane(i, 0);
-  }
-  for (i = 2; i >= 0; i--) {
-    set_yplane(i, 0xff);
-    delay(D);
-    set_yplane(i, 0);
-  }
-  delay(D);
-  for (i = 0; i < 4; i++) {
-    set_zplane(i, 0xff);
-    delay(D);
-    set_zplane(i, 0);
-  }
-  for (i = 2; i >= 0; i--) {
-    set_zplane(i, 0xff);
-    delay(D);
-    set_zplane(i, 0);
-  }
-  delay(D);
-}
-
