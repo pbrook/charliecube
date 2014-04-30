@@ -7,6 +7,7 @@
  */
  
 #include <TimerOne.h>
+#include "charliecube.h"
 
 // pin mappings are as follows:
 // Arduino pin:  3  2  0  1  4  9 10  6 A3 A2 A1 A0
@@ -21,11 +22,11 @@
 
 #define NUM_PIXELS (4*4*4)
 
-volatile uint16_t framebuffer[12 * 16];
+static volatile uint16_t *display_base;
 
 // This table translates from logical pixel locations to the
 // anode/cathode matrix used by the framebuffer
-const uint8_t pixel_map[NUM_PIXELS] PROGMEM = {
+static const uint8_t pixel_map[NUM_PIXELS] PROGMEM = {
 #define PIXEL(a, k) ((a) | ((k) << 4))
 #include "board.h"
 };
@@ -40,7 +41,7 @@ tick(void)
   uint16_t cathode_mask;
 
   cathode_mask = 1u << cathode;
-  p = &framebuffer[cathode * 16];
+  p = &display_base[cathode * 16];
   /* tristate everything.  */
   DDRD = 0;
   DDRB = 0;
@@ -60,8 +61,8 @@ tick(void)
     cathode = 0;
 }
 
-static void
-set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
+void
+CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
 {
   uint8_t pixel_pos;
   uint8_t pos;
@@ -79,7 +80,7 @@ set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
   if (z & 2)
     pixel_pos += 32;
   pos = pgm_read_byte(&pixel_map[pixel_pos]);
-  p = &framebuffer[pos & 0xf0];
+  p = &write_base[pos & 0xf0];
   mask = 1u << (pos & 0xf);
   for (i = 0; i < val; i++)
     *(p++) |= mask;
@@ -88,10 +89,18 @@ set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
     *(p++) &= mask;
 }
 
-void setup()
+void
+CharlieCubeBase::begin(void)
 {
   Timer1.initialize(1000);
   Timer1.attachInterrupt(tick);
+}
+
+CharlieCube cube;
+
+void setup()
+{
+  cube.begin();
 }
 
 void set_xplane(uint8_t x, uint8_t val)
@@ -100,7 +109,7 @@ void set_xplane(uint8_t x, uint8_t val)
   uint8_t z;
   for (y = 0; y < 4; y++)
     for (z = 0; z < 4; z++)
-      set_pixel(x, y, z, val);
+      cube.set_pixel(x, y, z, val);
 }
 
 void set_yplane(uint8_t y, uint8_t val)
@@ -109,7 +118,7 @@ void set_yplane(uint8_t y, uint8_t val)
   uint8_t z;
   for (x = 0; x < 4; x++)
     for (z = 0; z < 4; z++)
-      set_pixel(x, y, z, val);
+      cube.set_pixel(x, y, z, val);
 }
 
 void set_zplane(uint8_t z, uint8_t val)
@@ -118,7 +127,13 @@ void set_zplane(uint8_t z, uint8_t val)
   uint8_t y;
   for (x = 0; x < 4; x++)
     for (y = 0; y < 4; y++)
-      set_pixel(x, y, z, val);
+      cube.set_pixel(x, y, z, val);
+}
+
+CharlieCube::CharlieCube(void) : CharlieCubeBase()
+{
+  write_base = framebuffer;
+  display_base = framebuffer;
 }
 
 #define D 200
@@ -138,6 +153,7 @@ void loop()
     delay(D);
     set_xplane(i, 0);
   }
+  delay(D);
   for (i = 0; i < 4; i++) {
     set_yplane(i, 0xff);
     delay(D);
@@ -148,10 +164,17 @@ void loop()
     delay(D);
     set_yplane(i, 0);
   }
+  delay(D);
   for (i = 0; i < 4; i++) {
     set_zplane(i, 0xff);
     delay(D);
     set_zplane(i, 0);
   }
+  for (i = 2; i >= 0; i--) {
+    set_zplane(i, 0xff);
+    delay(D);
+    set_zplane(i, 0);
+  }
+  delay(D);
 }
 
