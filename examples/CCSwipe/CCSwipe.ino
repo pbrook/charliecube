@@ -6,6 +6,7 @@
   Swipe a plane accross the x, y and z axes.
  */
  
+#include <TimerOne.h>
 #include "charliecube.h"
 
 #define D 200
@@ -46,7 +47,8 @@ void set_zplane(uint8_t z, uint8_t val)
 
 void loop()
 {
-  int8_t i;
+  int i;
+  int delta;
   for (i = 0; i < 4; i++) {
     set_xplane(i, 0xff);
     delay(D);
@@ -80,5 +82,23 @@ void loop()
     set_zplane(i, 0);
   }
   delay(D);
+  i = 0;
+  delta = 0x10;
+  while(1)
+  {
+    int x, y, z;
+    for (x = 0; x < 4; x++)
+      for (y = 0; y < 4; y++)
+	for (z = 0; z < 4; z++)
+	  cube.set_pixel(x, y, z, i);
+    delay(D/4);
+    i += delta;
+    if (i == 0x100) {
+	delta = -16;
+	i += delta;
+    } else if (i < 0) {
+	break;
+    }
+  }
 }
 

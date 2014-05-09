@@ -23,7 +23,8 @@
 
 #define NUM_PIXELS (4*4*4)
 
-static volatile uint16_t *display_base;
+static volatile uint16_t *volatile display_base;
+static volatile uint16_t *volatile new_display_base;
 
 // This table translates from logical pixel locations to the
 // anode/cathode matrix used by the framebuffer
@@ -40,6 +41,12 @@ tick(void)
   uint8_t i;
   uint16_t val;
   uint16_t cathode_mask;
+
+  if (display_base != new_display_base) {
+      display_base = new_display_base;
+  }
+  if (!display_base)
+    return;
 
   cathode_mask = 1u << cathode;
   p = &display_base[cathode * 16];
@@ -63,7 +70,7 @@ tick(void)
 }
 
 void
-CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
+CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t bright)
 {
   uint8_t pixel_pos;
   uint8_t pos;
@@ -71,10 +78,12 @@ CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
   volatile uint16_t *p;
   uint8_t i;
 
+  // Wrap coordinates
   x &= 3;
   y &= 3;
   z &= 3;
-  val >>= 4;
+  // We only implement 4 bits of intensity
+  bright >>= 4;
   pixel_pos = x + y * 8;
   if (z & 1)
     pixel_pos += 4;
@@ -83,7 +92,7 @@ CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
   pos = pgm_read_byte(&pixel_map[pixel_pos]);
   p = &write_base[pos & 0xf0];
   mask = 1u << (pos & 0xf);
-  for (i = 0; i < val; i++)
+  for (i = 0; i < bright; i++)
     *(p++) |= mask;
   mask = ~mask;
   for (; i < 16; i++)
@@ -93,6 +102,7 @@ CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t val)
 void
 CharlieCubeBase::begin(void)
 {
+  // 1kHz base frequency gives 83Hz refresh rate
   Timer1.initialize(1000);
   Timer1.attachInterrupt(tick);
 }
@@ -101,5 +111,46 @@ CharlieCubeBase::begin(void)
 CharlieCube::CharlieCube(void) : CharlieCubeBase()
 {
   write_base = framebuffer;
-  display_base = framebuffer;
+  new_display_base = framebuffer;
+}
+
+
+void
+CharlieCube2::update_base(void)
+{
+  uint8_t tmp = SREG;
+  cli();
+  new_display_base = &framebuffer[12*16*display_frame];
+  SREG = tmp;
+  write_base = &framebuffer[12*16*write_frame];
+}
+
+CharlieCube2::CharlieCube2(void) : CharlieCubeBase()
+{
+  display_frame = 0;
+  write_frame = 1;
+  update_base();
+}
+
+void
+CharlieCube2::swap(void)
+{
+  write_frame = !write_frame;
+  if (write_frame == display_frame)
+    display_frame = !display_frame;
+  update_base();
+}
+
+void
+CharlieCube2::wait(void)
+{
+  while (new_display_base != display_base)
+    /* no-op */ ;
+}
+
+void
+CharlieCube2::single_buffer(void)
+{
+  write_frame = display_frame;
+  update_base();
 }
