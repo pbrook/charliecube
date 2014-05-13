@@ -1,3 +1,6 @@
-Arduino sketch for driving a 4x4x4 charlieplexed LED cube
+Arduino library for driving a 4x4x4 charlieplexed LED cube.
 
-Accesses port registers directly, so will only work on atmega32u4 based boards.
+Accesses port registers directly, so will only work on atmega32u4 based boards, and only
+with the right pins.
+
+Provides both single and double buffered access.
