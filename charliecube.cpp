@@ -84,11 +84,7 @@ CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t bright)
   z &= 3;
   // We only implement 4 bits of intensity
   bright >>= 4;
-  pixel_pos = x + y * 8;
-  if (z & 1)
-    pixel_pos += 4;
-  if (z & 2)
-    pixel_pos += 32;
+  pixel_pos = x + y * 4 + z * 16;
   pos = pgm_read_byte(&pixel_map[pixel_pos]);
   p = &write_base[pos & 0xf0];
   mask = 1u << (pos & 0xf);

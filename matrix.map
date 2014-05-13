@@ -1,9 +1,25 @@
-ebgnmfkacdhj
-a j  a k  a m  a n  j a  k a  m a  n a
-b j  b k  b m  b n  j b  k b  m b  n b
-c j  c k  c m  c n  j c  k c  m c  n c
-d j  d k  d m  d n  j d  k d  m d  n d
-e j  e k  e m  e n  j e  k e  m e  n e
-f j  f k  f m  f n  j f  k f  m f  n f
-g j  g k  g m  g n  j g  k g  m g  n g
-h j  h k  h m  h n  j h  k h  m h  n h
+# First line selects common anode(A) or cathode(K), then pin mappings
+Kebgnmfkacdhj
+# Now four blocks of 4x4 anode/cathode pairs
+# This is effectively an 8x4 grid with a complementary pair of LEDs at
+# each intersection.  It is convenitent for a cube as each cathode drops
+# down to the cathode immediately below.
+a j  a k  a m  a n
+b j  b k  b m  b n
+c j  c k  c m  c n
+d j  d k  d m  d n
+
+j a  k a  m a  n a
+j b  k b  m b  n b
+j c  k c  m c  n c
+j d  k d  m d  n d
+
+e j  e k  e m  e n
+f j  f k  f m  f n
+g j  g k  g m  g n
+h j  h k  h m  h n
+
+j e  k e  m e  n e
+j f  k f  m f  n f
+j g  k g  m g  n g
+j h  k h  m h  n h
