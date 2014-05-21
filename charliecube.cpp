@@ -96,6 +96,16 @@ CharlieCubeBase::set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t bright)
 }
 
 void
+CharlieCubeBase::clear(void)
+{
+  uint8_t i;
+
+  for (i = 0; i < 12 * 16; i++) {
+      write_base[i] = 0;
+  }
+}
+
+void
 CharlieCubeBase::begin(void)
 {
   // 1kHz base frequency gives 83Hz refresh rate

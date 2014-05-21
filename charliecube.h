@@ -13,6 +13,8 @@ public:
   CharlieCubeBase(void) {};
   // Set a pixel value.  Brightness is from 0 (off) to 255 (full on).
   void set_pixel(uint8_t x, uint8_t y, uint8_t z, uint8_t bright);
+  // Set all pixels to zero
+  void clear(void);
   // Start the cube driver
   void begin(void);
 };
