@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define CUBE_SIZE 4
+
 // Common base class for single and double buffered implementations.
 // Do not use directly.
 class CharlieCubeBase

@@ -19,8 +19,8 @@ void set_xplane(uint8_t x, uint8_t val)
 {
   uint8_t y;
   uint8_t z;
-  for (y = 0; y < 4; y++)
-    for (z = 0; z < 4; z++)
+  for (y = 0; y < CUBE_SIZE; y++)
+    for (z = 0; z < CUBE_SIZE; z++)
       cube.set_pixel(x, y, z, val);
 }
 
@@ -37,9 +37,9 @@ Fade::tick(void)
 {
   int x, y, z;
 
-  for (x = 0; x < 4; x++)
-    for (y = 0; y < 4; y++)
-      for (z = 0; z < 4; z++)
+  for (x = 0; x < CUBE_SIZE; x++)
+    for (y = 0; y < CUBE_SIZE; y++)
+      for (z = 0; z < CUBE_SIZE; z++)
 	cube.set_pixel(x, y, z, bright);
   bright += delta;
   if (bright >= 0x100) {

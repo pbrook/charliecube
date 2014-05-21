@@ -8,11 +8,7 @@
 
 #define BODY_SIZE 16
 
-#define CUBE_SIZE 4
-
 #define IQ 10
-
-#define D 100
 
 #define INITIAL_ENERGY 0xc0
 #define ENERGY_DECAY 0x10
