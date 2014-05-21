@@ -8,6 +8,8 @@
 #include <charliecube.h>
 #include "ccdemo.h"
 
+// Advance to next demo after this many seconds
+#define MAX_DEMO_TIME 10
 
 #define DEMO(name) void register_##name(void);
 #include "ccdemo.def"
@@ -47,15 +49,20 @@ static void run_demo(CCDemo *demo)
   bool finished;
   unsigned long last_tick;
   uint16_t period;
+  long expires;
 
   period = demo->reset();
   finished = false;
   last_tick = millis();
+  expires = MAX_DEMO_TIME * 1000l;
   while (!finished) {
       finished = demo->tick();
       while (millis() - last_tick < period)
 	/* no-op */;
       last_tick += period;
+      expires -= period;
+      if (expires <= 0)
+	finished = true;
   }
 }
 
