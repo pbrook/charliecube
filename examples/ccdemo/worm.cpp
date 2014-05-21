@@ -4,8 +4,9 @@
   Released under the terms of the GNU General Public License version 3
  */
  
-#include <TimerOne.h>
-#include "charliecube.h"
+#include "ccdemo.h"
+
+#define BODY_SIZE 16
 
 #define CUBE_SIZE 4
 
@@ -16,8 +17,6 @@
 #define INITIAL_ENERGY 0xc0
 #define ENERGY_DECAY 0x10
 
-#define BODY_SIZE 16
-
 #define BODY_MASK (BODY_SIZE - 1)
 #if BODY_SIZE & BODY_MASK
 #error BODY_SIZE must be a power of two
@@ -26,15 +25,6 @@
 #if (INITIAL_ENERGY / ENERGY_DECAY + 2) >= BODY_SIZE
 #error BODY_SIZE too small
 #endif
-
-CharlieCube cube;
-
-void setup()
-{
-  // Not great, but better than nothing
-  randomSeed(analogRead(0));
-  cube.begin();
-}
 
 class Position
 {
@@ -58,17 +48,25 @@ public:
   }
 };
 
-class Worm
+class Worm : public CCDemo
 {
+  uint8_t dir;
+  int tries;
+  bool forward;
+  bool blocked;
+  Position current_pos;
+
   uint8_t head;
   uint8_t tail;
   Position body[BODY_SIZE];
   uint8_t energy[BODY_SIZE];
 public:
-  Worm() { }
   bool is_empty(const Position &p);
   void push(const Position &p);
   void age();
+public:
+  virtual int reset(void);
+  virtual bool tick(void);
 };
 
 bool
@@ -115,17 +113,20 @@ Worm::age()
   }
 }
 
-Worm worm;
-
-void loop()
+int
+Worm::reset(void)
 {
-  Position current_pos(0,0,0);
-  int dir = 0;
-  bool forward = true;
-  int tries = 0;
-  bool wait = false;
-  bool blocked = false;
+  current_pos = Position(0,0,0);
+  dir = 0;
+  tries = 0;
+  forward = true;
+  blocked = true;
+  return 100;
+}
 
+bool
+Worm::tick(void)
+{
   while (true) {
       Position new_pos = current_pos;
       if (blocked || random(4) != 0) {
@@ -133,26 +134,22 @@ void loop()
 	  forward = (random(2) == 0);
       }
       new_pos.advance(dir, forward);
-      if (worm.is_empty(new_pos)) {
+      if (is_empty(new_pos)) {
 	  current_pos = new_pos;
 	  cube.set_pixel(current_pos.x, current_pos.y, current_pos.z, 0xff);
-	  worm.push(current_pos);
+	  push(current_pos);
 	  tries += IQ;
-	  wait = true;
 	  blocked = false;
       } else {
 	  blocked = true;
 	  tries++;
       }
       if (tries >= IQ) {
-	  worm.age();
+	  age();
 	  tries = 0;
-	  wait = true;
-      }
-      if (wait) {
-	delay(D);
-	wait = false;
+	  return false;
       }
   }
 }
 
+DEF_DEMO(Worm)

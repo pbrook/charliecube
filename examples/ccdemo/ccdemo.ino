@@ -20,6 +20,8 @@ CharlieCubeBase &cube = real_cube;
 void setup()
 {
   Serial.begin(9600);
+  // Not great, but better than nothing
+  randomSeed(analogRead(0));
 #define DEMO(name) register_##name();
 #include "ccdemo.def"
 #undef DEMO

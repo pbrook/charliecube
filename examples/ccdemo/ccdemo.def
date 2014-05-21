@@ -1,3 +1,4 @@
 // Define all demos
 DEMO(Swipe)
 DEMO(Fade)
+DEMO(Worm)
