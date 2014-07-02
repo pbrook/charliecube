@@ -30,7 +30,7 @@ static volatile uint16_t *volatile new_display_base;
 // anode/cathode matrix used by the framebuffer
 static const uint8_t pixel_map[NUM_PIXELS] PROGMEM = {
 #define PIXEL(a, k) ((a) | ((k) << 4))
-#include "board.h"
+#include "util/board.h"
 };
 
 static void
