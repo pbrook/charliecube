@@ -38,11 +38,11 @@ class CharlieCube2 : public CharlieCubeBase
 public:
   CharlieCube2(void);
   // Swap front and back buffers
+  // If in single buffered mode then will switch write buffer without changing the displayed image
   void swap(void);
   // Wait for buffer swap to complete
   void wait(void);
   // Send writes directly to front buffer
-  // Calling swap() will reset to double buffered mode without changing the displayed image
   void single_buffer(void);
 private:
   void update_base(void);
